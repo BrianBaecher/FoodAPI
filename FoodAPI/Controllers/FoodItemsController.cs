@@ -40,12 +40,13 @@ namespace FoodAPI.Controllers
 		[HttpGet("byName/{name}")]
 		public async Task<ActionResult<FoodItem>> GetFoodItemByName(string name)
 		{
-			FoodItem? foodItem = await _context.FoodItems.FirstOrDefaultAsync(x => string.Compare(x.Name, name, true) == 0); // ignore case
+			FoodItem? foodItem = await _context.FoodItems.FirstOrDefaultAsync(x => (x.Name ?? string.Empty).ToLower() == name.ToLower()); // ignore case
 
 			if (foodItem == null)
 			{
 				return NotFound();
 			}
+
 
 			return foodItem;
 		}
@@ -54,7 +55,7 @@ namespace FoodAPI.Controllers
 		[HttpGet("inGroup/{groupName}")]
 		public async Task<ActionResult<IEnumerable<FoodItem>>> GetFoodGroup(string groupName)
 		{
-			var foodGroup = await _context.FoodItems.Where(x => string.Compare(x.Group, groupName, true) == 0).ToListAsync();
+			var foodGroup = await _context.FoodItems.Where(x => (x.Group ?? string.Empty).ToLower() == groupName.ToLower()).ToListAsync();
 
 			if (foodGroup == null || foodGroup.Count == 0)
 			{
@@ -68,7 +69,7 @@ namespace FoodAPI.Controllers
 		[HttpGet("inSubGroup/{subGroupName}")]
 		public async Task<ActionResult<IEnumerable<FoodItem>>> GetSubGroup(string subGroupName)
 		{
-			var subGroup = await _context.FoodItems.Where(x => string.Compare(x.SubGroup, subGroupName, true) == 0).ToListAsync();
+			var subGroup = await _context.FoodItems.Where(x => (x.SubGroup ?? string.Empty).ToLower() == subGroupName.ToLower()).ToListAsync();
 
 			if (subGroup == null || subGroup.Count == 0) { return NotFound(); }
 
@@ -79,7 +80,7 @@ namespace FoodAPI.Controllers
 		[HttpGet("groups")]
 		public async Task<ActionResult<IEnumerable<string?>>> GetValidGroups()
 		{
-			var groups = await _context.FoodItems.Select(x => x.Group).Distinct().ToListAsync();
+			var groups = await _context.FoodItems.Select(x => x.Group).Distinct().OrderBy(g => g).ToListAsync();
 
 			if (!groups.Any()) { return NotFound(); }
 
@@ -90,7 +91,7 @@ namespace FoodAPI.Controllers
 		[HttpGet("subGroups")]
 		public async Task<ActionResult<IEnumerable<string?>>> GetValidSubGroups()
 		{
-			var groups = await _context.FoodItems.Select(x => x.SubGroup).Distinct().ToListAsync();
+			var groups = await _context.FoodItems.Select(x => x.SubGroup).Distinct().OrderBy(sg => sg).ToListAsync();
 
 			if (!groups.Any()) { return NotFound(); }
 
